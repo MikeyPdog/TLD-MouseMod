@@ -1,0 +1,7 @@
+﻿// Whether mouse acceleration is on or off. true is the games default value 
+MouseAcceleration = false
+
+// How many frames of movement to smooth the mouse for. This averages out the mouse movement over a few frames, making the game feel smoother but can make mouse
+// movement feel laggy. must be between 1 and 20. 
+// 1=no smoothing. 20=max smoothing.
+MouseSmoothingSteps = 1

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Harmony;
+using System.Reflection;
+using UnityEngine;
 
 namespace MouseMod
 {
@@ -10,9 +11,17 @@ namespace MouseMod
     {
         public static bool MouseAcceleration = true;
         public static int MouseSmoothingSteps = 5;
+        private static readonly Version version;
+
+        static MouseModGlobals()
+        {
+            version = Assembly.GetExecutingAssembly().GetName().Version;
+        }
 
         public static void LoadFromFile()
         {
+            Log("");
+            Log(DateTime.Now + " ---- Loading Mouse Mod.");
             var dic = File.ReadAllLines("mods/MouseMod.txt")
                         .Where(l => !l.StartsWith("/"))
                         .Select(l => l.Split(new[] { '=' }))
@@ -26,10 +35,10 @@ namespace MouseMod
             if (leftoverEntries.Any())
             {
                 var leftoverString = string.Join(", ", leftoverEntries);
-                FileLog.Log("*** LINES FOUND WITHOUT MATCH :" + leftoverString);
+                Log("*** LINES FOUND WITHOUT MATCH :" + leftoverString);
             }
-
-            FileLog.Log("Finished loading MouseMod values.");
+            
+			Log("Version " + version + " loaded!");
         }
 
         public static void SetGlobal<T>(Dictionary<string, string> dict, string key, Action<T> globalSetter)
@@ -37,7 +46,7 @@ namespace MouseMod
             string value;
             if (!dict.TryGetValue(key, out value))
             {
-                FileLog.Log("* No entry for '" + key + "' found. Defaulting value.");
+                Log("* No entry for '" + key + "' found. Defaulting value.");
                 return;
             }
 
@@ -47,14 +56,14 @@ namespace MouseMod
                     ? ParseToEnum<T>(value) 
                     : ParseTo<T>(value);
 
-                FileLog.Log("* Setting " + key + " to " + val);
+                Log("* Setting " + key + " to " + val);
                 dict.Remove(key);
                 globalSetter(val);
             }
             catch (Exception e)
             {
-                FileLog.Log("*** BAD VALUE for '" + key + "' ('" + value + "'). Defaulting value. Full error below:");
-                FileLog.Log(e.Message);
+                Log("*** BAD VALUE for '" + key + "' ('" + value + "'). Defaulting value. Full error below:");
+                Log(e.Message);
             }
         }
 
@@ -66,6 +75,11 @@ namespace MouseMod
         public static T ParseToEnum<T>(string input)
         {
             return (T)Enum.Parse(typeof(T), input);
+        }
+
+        public static void Log(string message)
+        {
+            Debug.Log("[MouseMod] " + message);
         }
     }
 }
